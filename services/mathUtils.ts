@@ -35,79 +35,127 @@ export const simplify = (n: number, d: number): FractionType => {
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 // Generate a random fraction
-const generateFraction = (maxWhole: number, maxDenom: number): FractionType => {
+const generateFraction = (maxWhole: number, maxDenom: number, forceImproper: boolean = false): FractionType => {
   const d = randomInt(2, maxDenom);
-  const n = randomInt(1, d - 1);
-  const whole = randomInt(0, maxWhole);
+  let n: number;
+  let whole: number;
+
+  if (forceImproper) {
+    whole = 0;
+    n = randomInt(d + 1, d * (maxWhole || 3) + d - 1);
+  } else {
+    n = randomInt(1, d - 1);
+    whole = randomInt(0, maxWhole);
+  }
+  
   return { whole, n, d };
 };
 
 export const generateProblem = (operation: Operation, difficulty: number): Problem => {
   let left: FractionType;
-  let right: FractionType;
-  let expected: FractionType;
+  let right: FractionType | null = null;
+  let expected: FractionType | string;
 
   // Difficulty scaling
-  const maxWhole = difficulty === 1 ? 0 : difficulty === 2 ? 3 : 5;
-  const maxDenom = difficulty === 1 ? 6 : difficulty === 2 ? 12 : 20;
+  const maxWhole = difficulty === 1 ? 1 : difficulty === 2 ? 3 : 5;
+  const maxDenom = difficulty === 1 ? 6 : difficulty === 2 ? 12 : 25;
 
-  // Basic generation
-  left = generateFraction(maxWhole, maxDenom);
-  right = generateFraction(maxWhole, maxDenom);
-
-  // Ensure denominators relate nicely for level 1 addition/subtraction
-  if (difficulty === 1 && (operation === Operation.ADD || operation === Operation.SUBTRACT)) {
-    right.d = left.d; // Same denominator for easy mode
-  } else if (difficulty === 2 && (operation === Operation.ADD || operation === Operation.SUBTRACT)) {
-     // Make one denominator a multiple of the other often
-     if (Math.random() > 0.5) {
-        right.d = left.d * randomInt(2, 3);
-     }
+  if (operation === Operation.CONVERT_TO_MIXED) {
+    // Generate improper fraction (e.g., 15/4)
+    // Diff 1: Small numbers. Diff 3: Big numbers like in PDF (59/7, 119/26)
+    const factor = difficulty === 3 ? 10 : difficulty === 2 ? 5 : 3;
+    left = generateFraction(factor, maxDenom, true);
+    // Ensure it's improper
+    if (left.whole > 0) { // Should not happen with forceImproper but safety check
+        left = { whole: 0, n: left.whole * left.d + left.n, d: left.d };
+    }
+    right = null;
+    expected = simplify(left.n, left.d);
+  } 
+  else if (operation === Operation.CONVERT_TO_IMPROPER) {
+    // Generate mixed number (e.g., 2 1/7)
+    left = generateFraction(maxWhole || 1, maxDenom);
+    if (left.whole === 0) left.whole = randomInt(1, 4); // Ensure we have a whole part
+    right = null;
+    const imp = toImproper(left);
+    expected = { whole: 0, n: imp.n, d: imp.d };
   }
+  else if (operation === Operation.COMPARE) {
+    left = generateFraction(maxWhole, maxDenom);
+    right = generateFraction(maxWhole, maxDenom);
+    
+    // PDF scenarios: Same denominator or Same numerator
+    const scenario = Math.random();
+    if (scenario < 0.3) {
+      // Same denominator
+      right.d = left.d;
+      right.n = randomInt(1, right.d * 2); 
+    } else if (scenario < 0.6) {
+      // Same numerator
+      if (left.n === 0 && left.whole === 0) left.n = 1;
+      right.n = left.n;
+      right.whole = left.whole;
+      right.d = randomInt(2, maxDenom);
+      while (right.d === left.d) right.d = randomInt(2, maxDenom);
+    }
 
-  // Operation logic
-  const leftImp = toImproper(left);
-  const rightImp = toImproper(right);
-  
-  let resN = 0;
-  let resD = 1;
+    const lVal = left.whole + left.n / left.d;
+    const rVal = right.whole + right.n / right.d;
+    
+    // Avoid exact equality to make it more fun, unless intended
+    if (Math.abs(lVal - rVal) < 0.0001) expected = '=';
+    else expected = lVal > rVal ? '>' : '<';
+  }
+  else {
+    // Standard Operations
+    left = generateFraction(maxWhole, maxDenom);
+    right = generateFraction(maxWhole, maxDenom);
 
-  switch (operation) {
-    case Operation.ADD:
-      // (n1*d2 + n2*d1) / (d1*d2)
-      resN = leftImp.n * rightImp.d + rightImp.n * leftImp.d;
-      resD = leftImp.d * rightImp.d;
-      break;
-    case Operation.SUBTRACT:
-      // Ensure result is positive for 5th grade level usually
-      if (leftImp.n / leftImp.d < rightImp.n / rightImp.d) {
-        const temp = left;
-        left = right;
-        right = temp;
-        // recalculate improper
-        const lI = toImproper(left);
-        const rI = toImproper(right);
-        resN = lI.n * rI.d - rI.n * lI.d;
-        resD = lI.d * rI.d;
-      } else {
-        resN = leftImp.n * rightImp.d - rightImp.n * leftImp.d;
+    // Ensure denominators relate nicely for level 1
+    if (difficulty === 1 && (operation === Operation.ADD || operation === Operation.SUBTRACT)) {
+      right.d = left.d; 
+    }
+
+    const leftImp = toImproper(left);
+    const rightImp = toImproper(right);
+    
+    let resN = 0;
+    let resD = 1;
+
+    switch (operation) {
+      case Operation.ADD:
+        resN = leftImp.n * rightImp.d + rightImp.n * leftImp.d;
         resD = leftImp.d * rightImp.d;
-      }
-      break;
-    case Operation.MULTIPLY:
-      resN = leftImp.n * rightImp.n;
-      resD = leftImp.d * rightImp.d;
-      break;
-    case Operation.DIVIDE:
-      // Flip second fraction
-      resN = leftImp.n * rightImp.d;
-      resD = leftImp.d * rightImp.n;
-      break;
-    default:
-      break;
-  }
+        break;
+      case Operation.SUBTRACT:
+        // Ensure result is positive
+        if (leftImp.n / leftImp.d < rightImp.n / rightImp.d) {
+          const temp = left;
+          left = right;
+          right = temp;
+          const lI = toImproper(left);
+          const rI = toImproper(right);
+          resN = lI.n * rI.d - rI.n * lI.d;
+          resD = lI.d * rI.d;
+        } else {
+          resN = leftImp.n * rightImp.d - rightImp.n * leftImp.d;
+          resD = leftImp.d * rightImp.d;
+        }
+        break;
+      case Operation.MULTIPLY:
+        resN = leftImp.n * rightImp.n;
+        resD = leftImp.d * rightImp.d;
+        break;
+      case Operation.DIVIDE:
+        resN = leftImp.n * rightImp.d;
+        resD = leftImp.d * rightImp.n;
+        break;
+      default:
+        break;
+    }
 
-  expected = simplify(resN, resD);
+    expected = simplify(resN, resD);
+  }
 
   return {
     id: Math.random().toString(36).substr(2, 9),
@@ -119,9 +167,16 @@ export const generateProblem = (operation: Operation, difficulty: number): Probl
   };
 };
 
-export const checkAnswer = (input: FractionType, expected: FractionType): boolean => {
+export const checkAnswer = (input: FractionType | string, expected: FractionType | string): boolean => {
+  if (typeof expected === 'string') {
+    return input === expected;
+  }
+  
+  // For fraction comparison
+  if (typeof input === 'string') return false; // Should not happen
+  
   const inputImp = toImproper(input);
   const expectedImp = toImproper(expected);
-  // Compare cross products to avoid floating point issues
+  // Compare cross products
   return inputImp.n * expectedImp.d === expectedImp.n * inputImp.d;
 };

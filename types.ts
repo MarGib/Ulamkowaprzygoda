@@ -11,15 +11,17 @@ export enum Operation {
   SUBTRACT = 'subtract',
   MULTIPLY = 'multiply',
   DIVIDE = 'divide',
-  MIXED = 'mixed'
+  CONVERT_TO_MIXED = 'convert_mixed',     // Wyłączanie całości
+  CONVERT_TO_IMPROPER = 'convert_improper', // Zamiana na niewłaściwy
+  COMPARE = 'compare'                     // Porównywanie
 }
 
 export interface Problem {
   id: string;
   type: Operation;
   left: FractionType;
-  right: FractionType;
-  expected: FractionType;
+  right: FractionType | null; // Right is null for conversions
+  expected: FractionType | string; // Result can be a fraction or a sign (<, >, =)
   difficulty: number; // 1-3
 }
 

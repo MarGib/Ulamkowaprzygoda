@@ -18,18 +18,18 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
         return [
           {
             title: "Wspólny Mianownik",
-            desc: "Aby dodać lub odjąć ułamki, muszą mieć ten sam dół (mianownik).",
+            description: "Aby dodać lub odjąć ułamki, muszą mieć ten sam dół (mianownik).",
             example: (
               <div className="flex items-center gap-4 bg-blue-50 p-4 rounded-xl">
                 <FractionDisplay fraction={{ whole: 0, n: 1, d: 2 }} />
-                <span>nie pasuje do</span>
+                <span>≠</span>
                 <FractionDisplay fraction={{ whole: 0, n: 1, d: 4 }} />
               </div>
             )
           },
           {
             title: "Rozszerzanie Ułamków",
-            desc: "Musimy pomnożyć licznik i mianownik przez tę samą liczbę, aby doły były równe.",
+            description: "Musimy pomnożyć licznik i mianownik przez tę samą liczbę, aby mianowniki były równe.",
             example: (
               <div className="flex items-center gap-2 bg-blue-50 p-4 rounded-xl flex-wrap justify-center">
                 <FractionDisplay fraction={{ whole: 0, n: 1, d: 2 }} />
@@ -46,7 +46,7 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
           },
           {
             title: "Dodawanie/Odejmowanie",
-            desc: "Gdy mianowniki są równe, dodajemy (lub odejmujemy) tylko liczniki. Mianownik bez zmian!",
+            description: "Gdy mianowniki są równe, dodajemy (lub odejmujemy) tylko liczniki. Mianownik bez zmian!",
             example: (
               <div className="flex items-center gap-2 bg-green-50 p-4 rounded-xl">
                 <FractionDisplay fraction={{ whole: 0, n: 2, d: 4 }} />
@@ -62,7 +62,7 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
         return [
           {
             title: "Mnożenie jest proste!",
-            desc: "Mnożymy górę razy górę (liczniki) i dół razy dół (mianowniki).",
+            description: "Mnożymy górę razy górę (liczniki) i dół razy dół (mianowniki).",
             example: (
               <div className="flex items-center gap-2 bg-purple-50 p-4 rounded-xl">
                 <FractionDisplay fraction={{ whole: 0, n: 2, d: 3 }} />
@@ -73,7 +73,7 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
           },
           {
             title: "Wynik",
-            desc: "2 razy 4 to 8. 3 razy 5 to 15.",
+            description: "2 razy 4 to 8. 3 razy 5 to 15.",
             example: (
               <div className="flex items-center gap-2 bg-purple-50 p-4 rounded-xl">
                 <FractionDisplay fraction={{ whole: 0, n: 2, d: 3 }} />
@@ -83,24 +83,13 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
                 <FractionDisplay fraction={{ whole: 0, n: 8, d: 15 }} />
               </div>
             )
-          },
-          {
-            title: "Liczby Mieszane",
-            desc: "Jeśli masz całości (np. 1 1/2), zamień je najpierw na ułamek niewłaściwy!",
-            example: (
-              <div className="flex items-center gap-2 bg-yellow-50 p-4 rounded-xl">
-                <FractionDisplay fraction={{ whole: 1, n: 1, d: 2 }} />
-                <span>→</span>
-                <FractionDisplay fraction={{ whole: 0, n: 3, d: 2 }} />
-              </div>
-            )
           }
         ];
       case Operation.DIVIDE:
         return [
           {
             title: "Odwrotność",
-            desc: "Dzielenie to mnożenie przez odwrotność drugiej liczby. Odwracamy drugi ułamek 'do góry nogami'.",
+            description: "Dzielenie to mnożenie przez odwrotność. Drugi ułamek odwracamy 'do góry nogami'.",
             example: (
               <div className="flex items-center gap-2 bg-orange-50 p-4 rounded-xl">
                  <span>Dzielimy przez</span>
@@ -111,8 +100,8 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
             )
           },
           {
-            title: "Przykład",
-            desc: "Zamieniamy dzielenie na mnożenie i odwracamy drugi ułamek.",
+            title: "Zasada",
+            description: "Zamieniamy dzielenie na mnożenie i odwracamy drugi ułamek.",
             example: (
               <div className="flex items-center gap-2 bg-orange-50 p-4 rounded-xl flex-wrap">
                 <FractionDisplay fraction={{ whole: 0, n: 4, d: 5 }} />
@@ -122,6 +111,81 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
                 <FractionDisplay fraction={{ whole: 0, n: 4, d: 5 }} />
                 <span>·</span>
                 <FractionDisplay fraction={{ whole: 0, n: 3, d: 2 }} />
+              </div>
+            )
+          }
+        ];
+      case Operation.CONVERT_TO_MIXED:
+        return [
+          {
+            title: "Wyłączanie całości",
+            description: "Gdy licznik jest większy od mianownika, ułamek ma w sobie całości. Dzielimy licznik przez mianownik.",
+            example: (
+              <div className="flex items-center gap-4 bg-teal-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 0, n: 7, d: 2 }} />
+                <span>→</span>
+                <span>Ile dwójek w siódemce? (3)</span>
+              </div>
+            )
+          },
+          {
+            title: "Reszta to licznik",
+            description: "3 całe dwójki to 6. Zostaje nam 1 reszty (7 - 6 = 1).",
+            example: (
+              <div className="flex items-center gap-4 bg-teal-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 0, n: 7, d: 2 }} />
+                <span>=</span>
+                <FractionDisplay fraction={{ whole: 3, n: 1, d: 2 }} />
+              </div>
+            )
+          }
+        ];
+      case Operation.CONVERT_TO_IMPROPER:
+        return [
+          {
+            title: "Włączanie całości",
+            description: "Chcemy zamienić liczbę mieszaną na ułamek niewłaściwy. Mnożymy całość przez mianownik i dodajemy licznik.",
+            example: (
+              <div className="flex items-center gap-4 bg-pink-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 2, n: 1, d: 3 }} />
+                <span>→</span>
+                <span>2 · 3 + 1 = 7</span>
+              </div>
+            )
+          },
+          {
+            title: "Wynik",
+            description: "Licznik to nasz wynik (7), a mianownik pozostaje bez zmian (3).",
+            example: (
+              <div className="flex items-center gap-4 bg-pink-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 2, n: 1, d: 3 }} />
+                <span>=</span>
+                <FractionDisplay fraction={{ whole: 0, n: 7, d: 3 }} />
+              </div>
+            )
+          }
+        ];
+      case Operation.COMPARE:
+        return [
+          {
+            title: "Ten sam mianownik",
+            description: "Jeśli doły (mianowniki) są takie same, większy jest ten ułamek, który ma większy licznik.",
+            example: (
+              <div className="flex items-center gap-4 bg-indigo-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 0, n: 3, d: 5 }} />
+                <span className="text-2xl font-bold">&gt;</span>
+                <FractionDisplay fraction={{ whole: 0, n: 1, d: 5 }} />
+              </div>
+            )
+          },
+          {
+            title: "Ten sam licznik",
+            description: "Jeśli góry (liczniki) są takie same, większy jest ten, który ma MNIEJSZY mianownik (mniejsze kawałki).",
+            example: (
+              <div className="flex items-center gap-4 bg-indigo-50 p-4 rounded-xl">
+                <FractionDisplay fraction={{ whole: 0, n: 1, d: 2 }} />
+                <span className="text-2xl font-bold">&gt;</span>
+                <FractionDisplay fraction={{ whole: 0, n: 1, d: 4 }} />
               </div>
             )
           }
@@ -150,7 +214,7 @@ const Tutorial: React.FC<Props> = ({ operation, onComplete }) => {
       <div className="p-8 min-h-[300px] flex flex-col justify-between">
         <div className="space-y-6">
           <h3 className="text-2xl font-bold text-slate-800">{steps[step].title}</h3>
-          <p className="text-lg text-slate-600 leading-relaxed">{steps[step].desc}</p>
+          <p className="text-lg text-slate-600 leading-relaxed">{steps[step].description}</p>
           <div className="flex justify-center py-6">
             {steps[step].example}
           </div>
