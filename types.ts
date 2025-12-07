@@ -32,3 +32,37 @@ export interface TutorialStep {
   description: string;
   example: React.ReactNode;
 }
+
+// --- NEW TYPES FOR INTERACTIVE SOLVING ---
+
+export type StepType = 
+  | 'convert_improper' 
+  | 'common_denominator' 
+  | 'reciprocal' 
+  | 'calculate' 
+  | 'simplify' 
+  | 'compare_final';
+
+export interface StepInputConfig {
+    left?: boolean;   // Does this step require input for the left number?
+    right?: boolean;  // Does this step require input for the right number?
+    center?: boolean; // Does this step require a single central input (the result)?
+    sign?: boolean;   // For comparison (<, >, =)
+}
+
+export interface InteractiveStep {
+    id: number;
+    type: StepType;
+    title: string;       // E.g., "Zamień na ułamek niewłaściwy"
+    hint: string;        // The specific helper text for the ? icon
+    
+    // The expected values for this specific step
+    expectedLeft?: FractionType;
+    expectedRight?: FractionType;
+    expectedCenter?: FractionType | string; 
+    
+    inputConfig: StepInputConfig;
+    
+    // Visual symbol between left/right for this step (e.g., +, -, *, :)
+    symbol: string; 
+}
