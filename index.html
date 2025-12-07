@@ -24,9 +24,22 @@
 
       .notebook-paper {
         background-color: #ffffff;
-        background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
-        background-size: 100% 2rem;
+        background-image: 
+          linear-gradient(90deg, transparent 3rem, #fca5a5 3rem, #fca5a5 3.1rem, transparent 3.1rem),
+          linear-gradient(#e5e7eb 1px, transparent 1px);
+        background-size: 100% 100%, 100% 2rem;
         line-height: 2rem;
+        background-attachment: local;
+      }
+
+      /* Hide number input arrows (spinners) */
+      .remove-arrow::-webkit-inner-spin-button, 
+      .remove-arrow::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      .remove-arrow { 
+        -moz-appearance: textfield; 
       }
     </style>
   <script type="importmap">
